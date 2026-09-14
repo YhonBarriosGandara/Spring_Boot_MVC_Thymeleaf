@@ -2,8 +2,8 @@ package com.udc.fincas;
 
 import com.udc.fincas.entity.Finca;
 import com.udc.fincas.entity.Usuario;
-import com.udc.fincas.repository.FincaRepository;
-import com.udc.fincas.repository.UsuarioRepository;
+import com.udc.fincas.service.FincaService;
+import com.udc.fincas.service.UsuarioService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,39 +18,49 @@ import static org.junit.jupiter.api.Assertions.*;
 class FincasApplicationTests {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
 
     @Autowired
-    private FincaRepository fincaRepository;
+    private FincaService fincaService;
 
     @Test
     void contextLoads() {
-        assertNotNull(usuarioRepository);
-        assertNotNull(fincaRepository);
+        assertNotNull(usuarioService);
+        assertNotNull(fincaService);
     }
 
     @Test
-    void testUsuariosEnBaseDeDatos() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        assertFalse(usuarios.isEmpty(), "Debe haber usuarios precargados");
-        assertTrue(usuarios.size() >= 4, "Debe haber al menos 4 usuarios");
+    void testServicioUsuarios() {
+        List<Usuario> usuarios = usuarioService.listarTodos();
+        assertFalse(usuarios.isEmpty(), "Debe haber usuarios registrados");
+        assertTrue(usuarios.size() >= 4);
 
-        Optional<Usuario> admin = usuarioRepository.findByIdAndClave("admin", "admin123");
-        assertTrue(admin.isPresent(), "El usuario admin debe autenticar correctamente");
-        assertEquals("ADMINISTRADOR", admin.get().getRol());
+        Optional<Usuario> auth = usuarioService.autenticar("admin", "admin123");
+        assertTrue(auth.isPresent(), "Autenticacion exitosa para admin");
+        assertEquals("ADMINISTRADOR", auth.get().getRol());
+
+        List<Usuario> admins = usuarioService.buscarPorRol("ADMINISTRADOR");
+        assertFalse(admins.isEmpty());
+
+        List<Usuario> coincidencias = usuarioService.buscarPorNombre("Rodriguez");
+        assertFalse(coincidencias.isEmpty());
     }
 
     @Test
-    void testFincasEnBaseDeDatos() {
-        List<Finca> fincas = fincaRepository.findAll();
-        assertFalse(fincas.isEmpty(), "Debe haber fincas precargadas");
-        assertTrue(fincas.size() >= 7, "Debe haber al menos 7 fincas con los 12 atributos");
+    void testServicioFincasYReportes() {
+        List<Finca> fincas = fincaService.listarTodas();
+        assertFalse(fincas.isEmpty(), "Debe haber fincas registradas");
+        assertTrue(fincas.size() >= 7);
 
-        List<Finca> leche = fincaRepository.findByProduceLecheTrue();
-        assertFalse(leche.isEmpty(), "Debe haber fincas que producen leche");
-
-        List<Finca> antioquia = fincaRepository.findByDepartamentoIgnoreCaseAndNumHectareasBetween(
+        // Reporte 1: Ubicacion y extension
+        List<Finca> reporte1 = fincaService.filtrarPorUbicacionYExtension(
                 "Antioquia", BigDecimal.valueOf(50), BigDecimal.valueOf(200));
-        assertFalse(antioquia.isEmpty(), "Debe encontrar finca en Antioquia dentro del rango");
+        assertFalse(reporte1.isEmpty());
+        assertEquals("Antioquia", reporte1.get(0).getDepartamento());
+
+        // Reporte 2: Produccion de leche
+        List<Finca> reporte2 = fincaService.filtrarPorProduccion(true, false, false, false);
+        assertFalse(reporte2.isEmpty());
+        assertTrue(reporte2.stream().allMatch(Finca::isProduceLeche));
     }
 }
