@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Dashboard')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar('dashboard')}"></nav>
+
+<div th:replace="~{fragments/header :: alerts}"></div>
+
+<main class="container py-4">
+    <!-- Banner de Bienvenida -->
+    <div class="card border-0 shadow-sm bg-success text-white mb-4 rounded-3 overflow-hidden">
+        <div class="card-body p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-light text-success fw-semibold mb-2">Plataforma Agropecuaria Spring MVC</span>
+                    <h1 class="display-6 fw-bold mb-2">Panel de Control AgroFincas</h1>
+                    <p class="lead mb-0 opacity-90">
+                        Sistema integral para la administración, supervisión geográfica y control de producción de propiedades rurales.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-center text-lg-end mt-3 mt-lg-0">
+                    <a th:href="@{/fincas/nuevo}" class="btn btn-light btn-lg text-success fw-semibold shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Registrar Finca
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Métricas -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small text-uppercase fw-bold">Predios Registrados</span>
+                        <div class="bg-success-subtle text-success p-2 rounded-3">
+                            <i class="bi bi-geo-alt-fill fs-5"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-1" th:text="${totalFincas}">7</h2>
+                    <small class="text-success"><i class="bi bi-check-circle-fill me-1"></i>100% geolocalizados</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small text-uppercase fw-bold">Área Total Supervisada</span>
+                        <div class="bg-primary-subtle text-primary p-2 rounded-3">
+                            <i class="bi bi-rulers fs-5"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-1" th:text="${#numbers.formatDecimal(totalHectareas, 1, 'COMMA', 1, 'POINT') + ' ha'}">950.0 ha</h2>
+                    <small class="text-primary"><i class="bi bi-pie-chart-fill me-1"></i>Extensión productiva</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small text-uppercase fw-bold">Usuarios del Sistema</span>
+                        <div class="bg-warning-subtle text-warning p-2 rounded-3">
+                            <i class="bi bi-people-fill fs-5"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-1" th:text="${totalUsuarios}">4</h2>
+                    <small class="text-muted"><i class="bi bi-shield-lock-fill me-1"></i>Roles configurados</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small text-uppercase fw-bold">Líneas de Producción</span>
+                        <div class="bg-info-subtle text-info p-2 rounded-3">
+                            <i class="bi bi-bar-chart-fill fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <span class="badge bg-info text-dark" th:text="'Leche: ' + ${fincasLeche}">Leche: 4</span>
+                        <span class="badge bg-warning text-dark" th:text="'Frutas: ' + ${fincasFrutas}">Frutas: 4</span>
+                        <span class="badge bg-success" th:text="'Verduras: ' + ${fincasVerduras}">Verduras: 3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fincas Recientes y Accesos Rápidos -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0 text-dark">
+                        <i class="bi bi-clock-history text-success me-2"></i>Predios Recientemente Registrados
+                    </h5>
+                    <a th:href="@{/fincas}" class="btn btn-sm btn-outline-success">Ver Todas</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Finca</th>
+                                    <th>Ubicación</th>
+                                    <th>Hectáreas</th>
+                                    <th>Propietario</th>
+                                    <th class="text-end pe-3">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="f : ${ultimasFincas}">
+                                    <td class="ps-3 fw-semibold" th:text="${f.nombre}">Finca La Esperanza</td>
+                                    <td>
+                                        <span th:text="${f.ciudad}">Rionegro</span>,
+                                        <small class="text-muted" th:text="${f.departamento}">Antioquia</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success" th:text="${f.numHectareas + ' ha'}">120 ha</span>
+                                    </td>
+                                    <td th:text="${f.propietario}">Carlos Restrepo</td>
+                                    <td class="text-end pe-3">
+                                        <a th:href="@{/fincas/editar/{id}(id=${f.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title fw-bold mb-0 text-dark">
+                        <i class="bi bi-lightning-charge text-warning me-2"></i>Accesos Rápidos
+                    </h5>
+                </div>
+                <div class="card-body d-flex flex-column gap-2">
+                    <a th:href="@{/fincas/nuevo}" class="btn btn-outline-success text-start p-3 d-flex align-items-center gap-3">
+                        <i class="bi bi-plus-circle fs-4 text-success"></i>
+                        <div>
+                            <div class="fw-bold">Nueva Finca</div>
+                            <small class="text-muted">Crear registro con los 12 atributos</small>
+                        </div>
+                    </a>
+                    <a th:href="@{/usuarios/nuevo}" class="btn btn-outline-primary text-start p-3 d-flex align-items-center gap-3">
+                        <i class="bi bi-person-plus fs-4 text-primary"></i>
+                        <div>
+                            <div class="fw-bold">Nuevo Usuario</div>
+                            <small class="text-muted">Registrar operador o administrador</small>
+                        </div>
+                    </a>
+                    <a th:href="@{/reportes}" class="btn btn-outline-dark text-start p-3 d-flex align-items-center gap-3">
+                        <i class="bi bi-file-earmark-bar-graph fs-4 text-dark"></i>
+                        <div>
+                            <div class="fw-bold">Consultas y Reportes</div>
+                            <small class="text-muted">Filtros parametrizados por entidad</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Ficha Técnica -->
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-info-circle text-primary me-2"></i>Ficha del Proyecto</h6>
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li><strong>Asignatura:</strong> Desarrollo Web - Unidad 2</li>
+                        <li><strong>Ejercicio:</strong> N.º 4 - Finca</li>
+                        <li><strong>Patrón:</strong> Spring MVC + Thymeleaf SSR</li>
+                        <li><strong>Estudiante:</strong> Yhon Barrios Gándara</li>
+                        <li><strong>Institución:</strong> Universidad de Cartagena</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

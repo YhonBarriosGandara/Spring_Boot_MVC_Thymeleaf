@@ -75,6 +75,20 @@ class FincasApplicationTests {
     }
 
     @Test
+    void testDashboardController() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("dashboard"))
+                .andExpect(model().attributeExists("totalFincas"))
+                .andExpect(model().attributeExists("totalUsuarios"))
+                .andExpect(model().attributeExists("totalHectareas"));
+
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("dashboard"));
+    }
+
+    @Test
     void testUsuarioController() throws Exception {
         mockMvc.perform(get("/usuarios"))
                 .andExpect(status().isOk())
