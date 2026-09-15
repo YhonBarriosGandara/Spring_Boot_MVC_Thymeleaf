@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 public interface FincaRepository extends JpaRepository<Finca, Long> {
 
+    List<Finca> findByNombreContainingIgnoreCaseOrPropietarioContainingIgnoreCase(String nombre, String propietario);
+
     /**
      * Reporte 1: Fincas filtradas por departamento y rango de hectareas.
      */

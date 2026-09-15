@@ -30,8 +30,21 @@ public class FincaService {
         return fincaRepository.findById(id);
     }
 
+    public List<Finca> buscarPorTermino(String termino) {
+        if (termino == null || termino.trim().isEmpty()) {
+            return listarTodas();
+        }
+        String q = termino.trim();
+        return fincaRepository.findByNombreContainingIgnoreCaseOrPropietarioContainingIgnoreCase(q, q);
+    }
+
     @Transactional
     public Finca guardar(Finca finca) {
+        // Logica de dominio: si metrosCuadrados es nulo o 0 y tiene hectareas, autocalcular (1 ha = 10,000 m2)
+        if ((finca.getMetrosCuadrados() == null || finca.getMetrosCuadrados().compareTo(BigDecimal.ZERO) == 0)
+                && finca.getNumHectareas() != null) {
+            finca.setMetrosCuadrados(finca.getNumHectareas().multiply(BigDecimal.valueOf(10000)));
+        }
         return fincaRepository.save(finca);
     }
 

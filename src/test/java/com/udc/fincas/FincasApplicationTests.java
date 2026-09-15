@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -85,5 +86,37 @@ class FincasApplicationTests {
                 .andExpect(view().name("usuario/form"))
                 .andExpect(model().attributeExists("usuario"))
                 .andExpect(model().attribute("esEdicion", false));
+    }
+
+    @Test
+    void testFincaController() throws Exception {
+        mockMvc.perform(get("/fincas"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("finca/listar"))
+                .andExpect(model().attributeExists("fincas"));
+
+        mockMvc.perform(get("/fincas/nuevo"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("finca/form"))
+                .andExpect(model().attributeExists("finca"))
+                .andExpect(model().attribute("esEdicion", false));
+
+        mockMvc.perform(post("/fincas/guardar")
+                .param("nombre", "Hacienda El Porvenir Test")
+                .param("pais", "Colombia")
+                .param("departamento", "Bolivar")
+                .param("ciudad", "Turbaco")
+                .param("numHectareas", "45.00")
+                .param("metrosCuadrados", "450000.00")
+                .param("propietario", "Yhon Barrios")
+                .param("capataz", "Pedro Gomez")
+                .param("produceLeche", "true")
+                .param("produceCereales", "false")
+                .param("produceFrutas", "true")
+                .param("produceVerduras", "false")
+                .param("esEdicion", "false"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/fincas"))
+                .andExpect(flash().attributeExists("mensajeExito"));
     }
 }

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head(${esEdicion} ? 'Editar Finca' : 'Nueva Finca')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar('fincas')}"></nav>
+
+<div th:replace="~{fragments/header :: alerts}"></div>
+
+<main class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i th:class="${esEdicion} ? 'bi bi-pencil-square me-2' : 'bi bi-plus-circle-fill me-2'"></i>
+                        <span th:text="${esEdicion} ? 'Editar Datos de la Finca' : 'Registrar Nueva Finca Agropecuaria'">Formulario Finca</span>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/fincas/guardar}" th:object="${finca}" method="post" novalidate>
+                        <input type="hidden" name="esEdicion" th:value="${esEdicion}">
+                        <input type="hidden" th:if="${esEdicion}" th:field="*{id}">
+
+                        <!-- Sección 1: Identificación y Ubicación -->
+                        <h6 class="text-success border-bottom pb-2 mb-3 fw-bold">
+                            <i class="bi bi-geo-alt me-1"></i> 1. Identificación y Ubicación Geográfica
+                        </h6>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-12">
+                                <label for="nombre" class="form-label fw-semibold">Nombre de la Finca / Predio <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''"
+                                       id="nombre" th:field="*{nombre}" placeholder="Ej: Finca La Primavera">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="pais" class="form-label fw-semibold">País <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:classappend="${#fields.hasErrors('pais')} ? 'is-invalid' : ''"
+                                       id="pais" th:field="*{pais}" placeholder="Colombia">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('pais')}" th:errors="*{pais}"></div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="departamento" class="form-label fw-semibold">Departamento <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:classappend="${#fields.hasErrors('departamento')} ? 'is-invalid' : ''"
+                                       id="departamento" th:field="*{departamento}" placeholder="Ej: Bolívar, Cundinamarca, Antioquia">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('departamento')}" th:errors="*{departamento}"></div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="ciudad" class="form-label fw-semibold">Ciudad / Municipio <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:classappend="${#fields.hasErrors('ciudad')} ? 'is-invalid' : ''"
+                                       id="ciudad" th:field="*{ciudad}" placeholder="Ej: Turbaco, Rionegro, Facatativá">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Sección 2: Dimensiones y Personal -->
+                        <h6 class="text-success border-bottom pb-2 mb-3 mt-4 fw-bold">
+                            <i class="bi bi-rulers me-1"></i> 2. Dimensiones y Personal Responsable
+                        </h6>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="numHectareas" class="form-label fw-semibold">Número de Hectáreas (ha) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" th:classappend="${#fields.hasErrors('numHectareas')} ? 'is-invalid' : ''"
+                                           id="numHectareas" th:field="*{numHectareas}" placeholder="Ej: 85.50" oninput="calcularMetros()">
+                                    <span class="input-group-text">ha</span>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('numHectareas')}" th:errors="*{numHectareas}"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="metrosCuadrados" class="form-label fw-semibold">Área en Metros Cuadrados (m²) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" th:classappend="${#fields.hasErrors('metrosCuadrados')} ? 'is-invalid' : ''"
+                                           id="metrosCuadrados" th:field="*{metrosCuadrados}" placeholder="Ej: 855000.00">
+                                    <span class="input-group-text">m²</span>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('metrosCuadrados')}" th:errors="*{metrosCuadrados}"></div>
+                                </div>
+                                <small class="text-muted">1 hectárea = 10,000 m² (cálculo automático sugerido).</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="propietario" class="form-label fw-semibold">Nombre del Propietario <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:classappend="${#fields.hasErrors('propietario')} ? 'is-invalid' : ''"
+                                       id="propietario" th:field="*{propietario}" placeholder="Ej: Jorge Restrepo">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('propietario')}" th:errors="*{propietario}"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="capataz" class="form-label fw-semibold">Nombre del Capataz / Administrador <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" th:classappend="${#fields.hasErrors('capataz')} ? 'is-invalid' : ''"
+                                       id="capataz" th:field="*{capataz}" placeholder="Ej: Ramiro Pérez">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('capataz')}" th:errors="*{capataz}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Sección 3: Líneas de Producción Agropecuaria -->
+                        <h6 class="text-success border-bottom pb-2 mb-3 mt-4 fw-bold">
+                            <i class="bi bi-flower1 me-1"></i> 3. Líneas de Producción Agropecuaria
+                        </h6>
+
+                        <div class="row g-3 p-3 bg-light rounded border mb-4">
+                            <div class="col-md-3 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="produceLeche" th:field="*{produceLeche}">
+                                    <label class="form-check-label fw-semibold" for="produceLeche">
+                                        <i class="bi bi-cup-hot-fill text-info me-1"></i> Produce Leche
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="produceCereales" th:field="*{produceCereales}">
+                                    <label class="form-check-label fw-semibold" for="produceCereales">
+                                        <i class="bi bi-flower1 text-warning me-1"></i> Produce Cereales
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="produceFrutas" th:field="*{produceFrutas}">
+                                    <label class="form-check-label fw-semibold" for="produceFrutas">
+                                        <i class="bi bi-apple text-danger me-1"></i> Produce Frutas
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="produceVerduras" th:field="*{produceVerduras}">
+                                    <label class="form-check-label fw-semibold" for="produceVerduras">
+                                        <i class="bi bi-basket-fill text-success me-1"></i> Produce Verduras
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a th:href="@{/fincas}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-agro px-4">
+                                <i class="bi bi-check-lg me-1"></i> Guardar Finca
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script>
+    function calcularMetros() {
+        const ha = document.getElementById('numHectareas').value;
+        const m2 = document.getElementById('metrosCuadrados');
+        if (ha && (!m2.value || m2.dataset.autocalc === 'true' || m2.value === '0')) {
+            m2.value = (parseFloat(ha) * 10000).toFixed(2);
+            m2.dataset.autocalc = 'true';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Gestión de Fincas')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar('fincas')}"></nav>
+
+<div th:replace="~{fragments/header :: alerts}"></div>
+
+<main class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-geo-alt-fill text-success me-2"></i>Gestión de Fincas Agropecuarias</h2>
+            <p class="text-muted mb-0">Administración de predios, áreas y producción agrícola/pecuaria (Ejercicio N.º 4)</p>
+        </div>
+        <div>
+            <a th:href="@{/fincas/nuevo}" class="btn btn-agro shadow-sm">
+                <i class="bi bi-plus-circle-fill me-1"></i> Nueva Finca
+            </a>
+        </div>
+    </div>
+
+    <!-- Barra de Búsqueda -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form th:action="@{/fincas}" method="get" class="row g-2 align-items-center">
+                <div class="col-md-9 col-sm-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="busqueda" class="form-control" placeholder="Buscar por nombre de finca o propietario..." th:value="${busqueda}">
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-agro flex-fill"><i class="bi bi-funnel-fill me-1"></i> Filtrar</button>
+                    <a th:if="${busqueda != null && !busqueda.isEmpty()}" th:href="@{/fincas}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla Completa con los 12 Atributos -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">ID</th>
+                            <th>Nombre de Finca</th>
+                            <th>Ubicación (Ciudad / Depto / País)</th>
+                            <th>Extensión (Hectáreas / m²)</th>
+                            <th>Propietario y Capataz</th>
+                            <th>Líneas de Producción</th>
+                            <th class="text-end pe-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(fincas)}">
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                No se encontraron fincas registradas en el sistema.
+                            </td>
+                        </tr>
+                        <tr th:each="f : ${fincas}">
+                            <td class="ps-3 fw-bold text-secondary" th:text="${f.id}">1</td>
+                            <td>
+                                <strong class="text-dark d-block" th:text="${f.nombre}">Finca La Esperanza</strong>
+                            </td>
+                            <td>
+                                <span class="d-block text-dark"><i class="bi bi-pin-map text-danger me-1"></i><span th:text="${f.ciudad}">Rionegro</span>, <span th:text="${f.departamento}">Antioquia</span></span>
+                                <small class="text-muted" th:text="${f.pais}">Colombia</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success fs-6 fw-semibold" th:text="${#numbers.formatDecimal(f.numHectareas, 1, 'COMMA', 2, 'POINT') + ' ha'}">120.50 ha</span>
+                                <small class="d-block text-muted" th:text="${#numbers.formatDecimal(f.metrosCuadrados, 1, 'COMMA', 2, 'POINT') + ' m²'}">1,205,000 m²</small>
+                            </td>
+                            <td>
+                                <div class="small"><i class="bi bi-person-fill text-primary me-1"></i><strong>Prop:</strong> <span th:text="${f.propietario}">Carlos Restrepo</span></div>
+                                <div class="small text-muted"><i class="bi bi-person-badge me-1"></i><strong>Cap:</strong> <span th:text="${f.capataz}">Manuel Osorio</span></div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span th:if="${f.produceLeche}" class="badge bg-info-subtle text-info-emphasis border border-info-subtle badge-prod">
+                                        <i class="bi bi-cup-hot-fill me-1"></i>Leche
+                                    </span>
+                                    <span th:if="${f.produceCereales}" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle badge-prod">
+                                        <i class="bi bi-flower1 me-1"></i>Cereales
+                                    </span>
+                                    <span th:if="${f.produceFrutas}" class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle badge-prod">
+                                        <i class="bi bi-apple me-1"></i>Frutas
+                                    </span>
+                                    <span th:if="${f.produceVerduras}" class="badge bg-success-subtle text-success-emphasis border border-success-subtle badge-prod">
+                                        <i class="bi bi-basket-fill me-1"></i>Verduras
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/fincas/editar/{id}(id=${f.id})}" class="btn btn-outline-primary" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" title="Eliminar"
+                                            data-bs-toggle="modal" th:data-bs-target="'#modalEliminarFinca-' + ${f.id}">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Modal Confirmación Eliminación -->
+                                <div class="modal fade" th:id="'modalEliminarFinca-' + ${f.id}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content text-start">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Eliminación</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                ¿Está seguro de que desea eliminar la finca <strong th:text="${f.nombre}">Nombre</strong> (Ubicada en <span th:text="${f.ciudad}">Ciudad</span>)?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <form th:action="@{/fincas/eliminar/{id}(id=${f.id})}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-danger">Eliminar Finca</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white border-top py-2 px-3 d-flex justify-content-between align-items-center text-muted small">
+            <span>Total de predios: <strong th:text="${#lists.size(fincas)}">0</strong> fincas</span>
+            <span>Mapeo completo de 12 atributos de negocio</span>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>
