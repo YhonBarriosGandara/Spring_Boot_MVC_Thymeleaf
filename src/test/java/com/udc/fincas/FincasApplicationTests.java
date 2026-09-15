@@ -6,15 +6,20 @@ import com.udc.fincas.service.FincaService;
 import com.udc.fincas.service.UsuarioService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class FincasApplicationTests {
 
     @Autowired
@@ -23,10 +28,14 @@ class FincasApplicationTests {
     @Autowired
     private FincaService fincaService;
 
+    @Autowired
+    private MockMvc mockMvc;
+
     @Test
     void contextLoads() {
         assertNotNull(usuarioService);
         assertNotNull(fincaService);
+        assertNotNull(mockMvc);
     }
 
     @Test
@@ -62,5 +71,19 @@ class FincasApplicationTests {
         List<Finca> reporte2 = fincaService.filtrarPorProduccion(true, false, false, false);
         assertFalse(reporte2.isEmpty());
         assertTrue(reporte2.stream().allMatch(Finca::isProduceLeche));
+    }
+
+    @Test
+    void testUsuarioController() throws Exception {
+        mockMvc.perform(get("/usuarios"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("usuario/listar"))
+                .andExpect(model().attributeExists("usuarios"));
+
+        mockMvc.perform(get("/usuarios/nuevo"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("usuario/form"))
+                .andExpect(model().attributeExists("usuario"))
+                .andExpect(model().attribute("esEdicion", false));
     }
 }

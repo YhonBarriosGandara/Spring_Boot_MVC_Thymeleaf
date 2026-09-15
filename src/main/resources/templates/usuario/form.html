@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head(${esEdicion} ? 'Editar Usuario' : 'Nuevo Usuario')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar('usuarios')}"></nav>
+
+<div th:replace="~{fragments/header :: alerts}"></div>
+
+<main class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i th:class="${esEdicion} ? 'bi bi-pencil-square me-2' : 'bi bi-person-plus-fill me-2'"></i>
+                        <span th:text="${esEdicion} ? 'Editar Usuario' : 'Registrar Nuevo Usuario'">Formulario de Usuario</span>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post" novalidate>
+                        <input type="hidden" name="esEdicion" th:value="${esEdicion}">
+
+                        <div class="mb-3">
+                            <label for="id" class="form-label fw-semibold">Identificador de Usuario (ID / Login) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" th:classappend="${#fields.hasErrors('id')} ? 'is-invalid' : ''"
+                                   id="id" th:field="*{id}" th:readonly="${esEdicion}"
+                                   placeholder="Ej: jgomez, admin, operador1">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></div>
+                            <small class="form-text text-muted" th:if="${esEdicion}">El identificador de usuario no se puede modificar.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label fw-semibold">Nombre Completo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''"
+                                   id="nombre" th:field="*{nombre}" placeholder="Ej: Juan Carlos Gómez">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-semibold">Correo Electrónico Institucional <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                   id="email" th:field="*{email}" placeholder="usuario@unicartagena.edu.co">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                            <small class="form-text text-muted">Utilizado para notificaciones y recuperación de acceso.</small>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="rol" class="form-label fw-semibold">Rol de Acceso <span class="text-danger">*</span></label>
+                                <select class="form-select" th:classappend="${#fields.hasErrors('rol')} ? 'is-invalid' : ''"
+                                        id="rol" th:field="*{rol}">
+                                    <option value="ADMIN">ADMIN - Administrador Total</option>
+                                    <option value="OPERADOR">OPERADOR - Gestión Operativa</option>
+                                    <option value="CONSULTOR">CONSULTOR - Solo Lectura</option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="clave" class="form-label fw-semibold">Contraseña <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" th:classappend="${#fields.hasErrors('clave')} ? 'is-invalid' : ''"
+                                       id="clave" th:field="*{clave}" placeholder="Ingrese contraseña">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a th:href="@{/usuarios}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-agro px-4">
+                                <i class="bi bi-check-lg me-1"></i> Guardar Usuario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>
