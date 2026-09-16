@@ -2,6 +2,7 @@ package com.udc.fincas;
 
 import com.udc.fincas.entity.Finca;
 import com.udc.fincas.entity.Usuario;
+import com.udc.fincas.service.EmailService;
 import com.udc.fincas.service.FincaService;
 import com.udc.fincas.service.UsuarioService;
 import org.junit.jupiter.api.Test;
@@ -31,12 +32,16 @@ class FincasApplicationTests {
     private FincaService fincaService;
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Test
     void contextLoads() {
         assertNotNull(usuarioService);
         assertNotNull(fincaService);
+        assertNotNull(emailService);
         assertNotNull(mockMvc);
     }
 
@@ -116,6 +121,30 @@ class FincasApplicationTests {
         mockMvc.perform(get("/logout").session(session))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    void testRecuperacionClave() throws Exception {
+        mockMvc.perform(get("/recuperar-clave"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("auth/recuperar"));
+
+        mockMvc.perform(post("/recuperar-clave")
+                .param("identificador", "usuarioInexistente"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("auth/recuperar"))
+                .andExpect(model().attributeExists("mensajeError"));
+
+        mockMvc.perform(post("/recuperar-clave")
+                .param("identificador", "jrodriguez"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"))
+                .andExpect(flash().attributeExists("mensajeExito"));
+
+        // Restaurar clave de jrodriguez para mantener consistencia de pruebas
+        Usuario op = usuarioService.buscarPorId("jrodriguez").orElseThrow();
+        op.setClave("clave2026");
+        usuarioService.guardar(op);
     }
 
     @Test

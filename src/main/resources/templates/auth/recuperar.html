@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Recuperación de Contraseña')}"></head>
+<body class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-sm-8 col-11">
+
+            <!-- Mensajes de alerta -->
+            <div th:replace="~{fragments/header :: alerts}"></div>
+
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header navbar-agro text-white text-center py-4">
+                    <div class="d-inline-flex p-3 bg-white rounded-circle text-success mb-2 shadow-sm">
+                        <i class="bi bi-envelope-at-fill fs-1 text-success"></i>
+                    </div>
+                    <h4 class="fw-bold mb-0">Recuperar Acceso</h4>
+                    <p class="small text-white-50 mb-0">AgroFincas UDC &bull; Servicio de Correo Jakarta Mail</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <p class="text-muted small text-center mb-4">
+                        Ingrese su identificador de usuario o su correo electrónico registrado. Le enviaremos una clave temporal de acceso de forma segura.
+                    </p>
+
+                    <form th:action="@{/recuperar-clave}" method="post">
+                        <div class="mb-4">
+                            <label for="identificador" class="form-label fw-semibold text-dark">
+                                <i class="bi bi-person-badge text-success me-1"></i> ID de Usuario o Correo
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="identificador" name="identificador"
+                                   placeholder="Ej: admin o usuario@unicartagena.edu.co"
+                                   th:value="${identificadorIngresado}" required autofocus>
+                        </div>
+
+                        <button type="submit" class="btn btn-agro btn-lg w-100 py-3 fw-bold shadow-sm mb-3">
+                            <i class="bi bi-send-fill me-2"></i> Enviar Clave Temporal
+                        </button>
+
+                        <div class="text-center">
+                            <a th:href="@{/login}" class="btn btn-link text-decoration-none text-muted small">
+                                <i class="bi bi-arrow-left me-1"></i> Volver a Iniciar Sesión
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Ayuda al docente / evaluador -->
+                    <div class="mt-4 p-3 bg-light rounded-3 border">
+                        <div class="d-flex align-items-center gap-1 text-success fw-bold small mb-1">
+                            <i class="bi bi-info-circle"></i> Ejemplo para probar:
+                        </div>
+                        <p class="small text-muted mb-0">
+                            Ingrese <code>admin</code> o <code>admin@unicartagena.edu.co</code> para verificar el flujo de restablecimiento y el envío de clave temporal.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white text-center py-3 border-0 text-muted small">
+                    Universidad de Cartagena &bull; Desarrollo Web
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
