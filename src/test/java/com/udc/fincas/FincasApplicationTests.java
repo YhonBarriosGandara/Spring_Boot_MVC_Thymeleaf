@@ -171,4 +171,28 @@ class FincasApplicationTests {
                 .andExpect(redirectedUrl("/fincas"))
                 .andExpect(flash().attributeExists("mensajeExito"));
     }
+
+    @Test
+    void testReporteController() throws Exception {
+        Usuario admin = usuarioService.buscarPorId("admin").orElseThrow();
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("usuarioLogueado", admin);
+
+        mockMvc.perform(get("/reportes").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/index"))
+                .andExpect(model().attributeExists("fincasExtension"))
+                .andExpect(model().attributeExists("fincasProduccion"))
+                .andExpect(model().attributeExists("usuariosRol"))
+                .andExpect(model().attributeExists("usuariosTermino"));
+
+        mockMvc.perform(get("/reportes").session(session)
+                .param("tipo", "fincas-extension")
+                .param("departamento", "Antioquia")
+                .param("minHectareas", "50")
+                .param("maxHectareas", "200"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("reportes/index"))
+                .andExpect(model().attribute("departamentoFiltro", "Antioquia"));
+    }
 }

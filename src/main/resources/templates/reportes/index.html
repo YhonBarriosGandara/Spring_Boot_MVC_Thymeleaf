@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Reportes y Consultas Parametrizadas')}"></head>
+<body>
+
+<nav th:replace="~{fragments/header :: navbar('reportes')}"></nav>
+
+<div th:replace="~{fragments/header :: alerts}"></div>
+
+<main class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-file-earmark-bar-graph-fill text-success me-2"></i>Reportes y Consultas Parametrizadas</h2>
+            <p class="text-muted mb-0">Consultas avanzadas en Spring Data JPA para la entidad Finca (Ejercicio N.º 4) y Usuario</p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-printer me-1"></i> Imprimir Reporte
+            </button>
+        </div>
+    </div>
+
+    <!-- Pestañas de Navegación de Reportes -->
+    <ul class="nav nav-pills nav-fill mb-4 p-2 bg-white rounded-3 shadow-sm" id="reportTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" th:classappend="${tipoActivo == 'fincas-extension' ? 'active bg-success text-white' : 'text-dark'}"
+                    id="tab-fincas-ext" data-bs-toggle="pill" data-bs-target="#panel-fincas-ext" type="button" role="tab">
+                <i class="bi bi-rulers me-2"></i>1. Fincas: Depto y Extensión
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" th:classappend="${tipoActivo == 'fincas-produccion' ? 'active bg-success text-white' : 'text-dark'}"
+                    id="tab-fincas-prod" data-bs-toggle="pill" data-bs-target="#panel-fincas-prod" type="button" role="tab">
+                <i class="bi bi-flower1 me-2"></i>2. Fincas: Líneas de Producción
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" th:classappend="${tipoActivo == 'usuarios-rol' ? 'active bg-success text-white' : 'text-dark'}"
+                    id="tab-usuarios-rol" data-bs-toggle="pill" data-bs-target="#panel-usuarios-rol" type="button" role="tab">
+                <i class="bi bi-shield-lock me-2"></i>3. Usuarios: Por Rol
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" th:classappend="${tipoActivo == 'usuarios-busqueda' ? 'active bg-success text-white' : 'text-dark'}"
+                    id="tab-usuarios-busq" data-bs-toggle="pill" data-bs-target="#panel-usuarios-busq" type="button" role="tab">
+                <i class="bi bi-search me-2"></i>4. Usuarios: Por Nombre
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de las Pestañas -->
+    <div class="tab-content" id="reportTabsContent">
+
+        <!-- ================= PANEL 1: FINCAS POR DEPARTAMENTO Y EXTENSION ================= -->
+        <div class="tab-pane fade" th:classappend="${tipoActivo == 'fincas-extension' ? 'show active' : ''}" id="panel-fincas-ext" role="tabpanel">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-funnel me-2"></i>Parámetros: Departamento y Rango de Hectáreas</h5>
+                </div>
+                <div class="card-body p-3">
+                    <form th:action="@{/reportes}" method="get" class="row g-3 align-items-end">
+                        <input type="hidden" name="tipo" value="fincas-extension">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">Departamento</label>
+                            <input type="text" name="departamento" class="form-control" placeholder="Ej: Antioquia, Bolívar, Cundinamarca" th:value="${departamentoFiltro}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Hectáreas Mínimas (ha)</label>
+                            <input type="number" step="0.01" name="minHectareas" class="form-control" placeholder="0" th:value="${minHectareasFiltro}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Hectáreas Máximas (ha)</label>
+                            <input type="number" step="0.01" name="maxHectareas" class="form-control" placeholder="9999" th:value="${maxHectareasFiltro}">
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-agro flex-fill"><i class="bi bi-search me-1"></i> Filtrar</button>
+                            <a th:href="@{/reportes(tipo='fincas-extension')}" class="btn btn-outline-secondary" title="Limpiar"><i class="bi bi-arrow-counterclockwise"></i></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Resultados Encontrados: <span class="badge bg-success" th:text="${#lists.size(fincasExtension)}">0</span></h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">ID</th>
+                                    <th>Finca</th>
+                                    <th>Departamento</th>
+                                    <th>Ciudad</th>
+                                    <th>Hectáreas</th>
+                                    <th>Metros Cuadrados</th>
+                                    <th>Propietario</th>
+                                    <th>Capataz</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(fincasExtension)}">
+                                    <td colspan="8" class="text-center py-4 text-muted">No hay fincas que coincidan con los parámetros especificados.</td>
+                                </tr>
+                                <tr th:each="f : ${fincasExtension}">
+                                    <td class="ps-3 fw-bold text-secondary" th:text="${f.id}">1</td>
+                                    <td class="fw-semibold text-dark" th:text="${f.nombre}">La Esperanza</td>
+                                    <td><span class="badge bg-light text-dark border" th:text="${f.departamento}">Antioquia</span></td>
+                                    <td th:text="${f.ciudad}">Rionegro</td>
+                                    <td><strong class="text-success" th:text="${#numbers.formatDecimal(f.numHectareas, 1, 'COMMA', 2, 'POINT') + ' ha'}">120 ha</strong></td>
+                                    <td class="text-muted" th:text="${#numbers.formatDecimal(f.metrosCuadrados, 1, 'COMMA', 2, 'POINT') + ' m²'}">1,200,000 m²</td>
+                                    <td th:text="${f.propietario}">Carlos Restrepo</td>
+                                    <td th:text="${f.capataz}">Manuel Osorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PANEL 2: FINCAS POR LINEAS DE PRODUCCION ================= -->
+        <div class="tab-pane fade" th:classappend="${tipoActivo == 'fincas-produccion' ? 'show active' : ''}" id="panel-fincas-prod" role="tabpanel">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-flower1 me-2"></i>Parámetros: Filtro Multi-criterio de Producción Agropecuaria</h5>
+                </div>
+                <div class="card-body p-3">
+                    <form th:action="@{/reportes}" method="get">
+                        <input type="hidden" name="tipo" value="fincas-produccion">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-2 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="repProduceLeche" name="produceLeche" value="true" th:checked="${filtroLeche}">
+                                    <label class="form-check-label fw-semibold" for="repProduceLeche"><i class="bi bi-cup-hot-fill text-info me-1"></i> Leche</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="repProduceCereales" name="produceCereales" value="true" th:checked="${filtroCereales}">
+                                    <label class="form-check-label fw-semibold" for="repProduceCereales"><i class="bi bi-flower1 text-warning me-1"></i> Cereales</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="repProduceFrutas" name="produceFrutas" value="true" th:checked="${filtroFrutas}">
+                                    <label class="form-check-label fw-semibold" for="repProduceFrutas"><i class="bi bi-apple text-danger me-1"></i> Frutas</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="repProduceVerduras" name="produceVerduras" value="true" th:checked="${filtroVerduras}">
+                                    <label class="form-check-label fw-semibold" for="repProduceVerduras"><i class="bi bi-basket-fill text-success me-1"></i> Verduras</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-agro flex-fill"><i class="bi bi-filter me-1"></i> Aplicar Filtro</button>
+                                <a th:href="@{/reportes(tipo='fincas-produccion')}" class="btn btn-outline-secondary" title="Ver Todas"><i class="bi bi-arrow-counterclockwise"></i></a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Predios con las Líneas Seleccionadas: <span class="badge bg-success" th:text="${#lists.size(fincasProduccion)}">0</span></h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">ID</th>
+                                    <th>Finca</th>
+                                    <th>Ubicación</th>
+                                    <th>Hectáreas</th>
+                                    <th>Líneas Activas</th>
+                                    <th>Propietario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(fincasProduccion)}">
+                                    <td colspan="6" class="text-center py-4 text-muted">No se encontraron fincas que cumplan todos los criterios simultáneos.</td>
+                                </tr>
+                                <tr th:each="f : ${fincasProduccion}">
+                                    <td class="ps-3 fw-bold text-secondary" th:text="${f.id}">1</td>
+                                    <td class="fw-semibold text-dark" th:text="${f.nombre}">La Primavera</td>
+                                    <td th:text="${f.ciudad + ', ' + f.departamento}">Turbaco, Bolívar</td>
+                                    <td th:text="${f.numHectareas + ' ha'}">85 ha</td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <span th:if="${f.produceLeche}" class="badge bg-info-subtle text-info-emphasis border">Leche</span>
+                                            <span th:if="${f.produceCereales}" class="badge bg-warning-subtle text-warning-emphasis border">Cereales</span>
+                                            <span th:if="${f.produceFrutas}" class="badge bg-danger-subtle text-danger-emphasis border">Frutas</span>
+                                            <span th:if="${f.produceVerduras}" class="badge bg-success-subtle text-success-emphasis border">Verduras</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${f.propietario}">Jorge Gómez</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PANEL 3: USUARIOS POR ROL ================= -->
+        <div class="tab-pane fade" th:classappend="${tipoActivo == 'usuarios-rol' ? 'show active' : ''}" id="panel-usuarios-rol" role="tabpanel">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-shield-lock me-2"></i>Parámetros: Filtrar Usuarios por Rol de Acceso</h5>
+                </div>
+                <div class="card-body p-3">
+                    <form th:action="@{/reportes}" method="get" class="row g-3 align-items-end">
+                        <input type="hidden" name="tipo" value="usuarios-rol">
+                        <div class="col-md-9 col-sm-8">
+                            <label class="form-label fw-semibold small">Seleccione Rol</label>
+                            <select name="rol" class="form-select">
+                                <option value="" th:selected="${rolFiltro == null || rolFiltro.isEmpty()}">-- Todos los Roles --</option>
+                                <option value="ADMIN" th:selected="${rolFiltro == 'ADMIN'}">ADMIN - Administrador del Sistema</option>
+                                <option value="OPERADOR" th:selected="${rolFiltro == 'OPERADOR'}">OPERADOR - Gestión Operativa</option>
+                                <option value="CONSULTOR" th:selected="${rolFiltro == 'CONSULTOR'}">CONSULTOR - Solo Lectura</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-agro flex-fill"><i class="bi bi-search me-1"></i> Consultar</button>
+                            <a th:href="@{/reportes(tipo='usuarios-rol')}" class="btn btn-outline-secondary" title="Limpiar"><i class="bi bi-arrow-counterclockwise"></i></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0">Usuarios con el Rol Seleccionado: <span class="badge bg-success" th:text="${#lists.size(usuariosRol)}">0</span></h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">ID / Login</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Correo Electrónico</th>
+                                    <th>Rol Asignado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(usuariosRol)}">
+                                    <td colspan="4" class="text-center py-4 text-muted">No se encontraron usuarios para el rol seleccionado.</td>
+                                </tr>
+                                <tr th:each="u : ${usuariosRol}">
+                                    <td class="ps-3 fw-bold text-primary" th:text="${u.id}">admin</td>
+                                    <td th:text="${u.nombre}">Nombre</td>
+                                    <td th:text="${u.email}">email@unicartagena.edu.co</td>
+                                    <td><span class="badge bg-success-subtle text-success border" th:text="${u.rol}">ROL</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PANEL 4: USUARIOS POR NOMBRE / COINCIDENCIA ================= -->
+        <div class="tab-pane fade" th:classappend="${tipoActivo == 'usuarios-busqueda' ? 'show active' : ''}" id="panel-usuarios-busq" role="tabpanel">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-search me-2"></i>Parámetros: Búsqueda Parametrizada por Coincidencia en Nombre</h5>
+                </div>
+                <div class="card-body p-3">
+                    <form th:action="@{/reportes}" method="get" class="row g-3 align-items-end">
+                        <input type="hidden" name="tipo" value="usuarios-busqueda">
+                        <div class="col-md-9 col-sm-8">
+                            <label class="form-label fw-semibold small">Término de Búsqueda (Nombre o Apellido)</label>
+                            <input type="text" name="terminoUsuario" class="form-control" placeholder="Ej: Barrios, Gómez, Restrepo..." th:value="${terminoUsuarioFiltro}">
+                        </div>
+                        <div class="col-md-3 col-sm-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-agro flex-fill"><i class="bi bi-search me-1"></i> Buscar</button>
+                            <a th:href="@{/reportes(tipo='usuarios-busqueda')}" class="btn btn-outline-secondary" title="Limpiar"><i class="bi bi-arrow-counterclockwise"></i></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0">Resultados de la Búsqueda: <span class="badge bg-success" th:text="${#lists.size(usuariosTermino)}">0</span></h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">ID</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Correo Institucional</th>
+                                    <th>Rol</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(usuariosTermino)}">
+                                    <td colspan="4" class="text-center py-4 text-muted">No se encontraron usuarios que coincidan con el término.</td>
+                                </tr>
+                                <tr th:each="u : ${usuariosTermino}">
+                                    <td class="ps-3 fw-bold text-primary" th:text="${u.id}">ybarriosg</td>
+                                    <td th:text="${u.nombre}">Yhon Barrios Gándara</td>
+                                    <td th:text="${u.email}">ybarriosg@unicartagena.edu.co</td>
+                                    <td><span class="badge bg-primary-subtle text-primary border" th:text="${u.rol}">ADMINISTRADOR</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>
