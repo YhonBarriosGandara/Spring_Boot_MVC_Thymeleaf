@@ -77,7 +77,7 @@
                                 <label for="metrosCuadrados" class="form-label fw-semibold">Área en Metros Cuadrados (m²) <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input type="number" step="0.01" class="form-control" th:classappend="${#fields.hasErrors('metrosCuadrados')} ? 'is-invalid' : ''"
-                                           id="metrosCuadrados" th:field="*{metrosCuadrados}" placeholder="Ej: 855000.00">
+                                           id="metrosCuadrados" th:field="*{metrosCuadrados}" placeholder="Ej: 855000.00" oninput="calcularHectareas()">
                                     <span class="input-group-text">m²</span>
                                     <div class="invalid-feedback" th:if="${#fields.hasErrors('metrosCuadrados')}" th:errors="*{metrosCuadrados}"></div>
                                 </div>
@@ -158,11 +158,24 @@
 
 <script>
     function calcularMetros() {
-        const ha = document.getElementById('numHectareas').value;
-        const m2 = document.getElementById('metrosCuadrados');
-        if (ha && (!m2.value || m2.dataset.autocalc === 'true' || m2.value === '0')) {
-            m2.value = (parseFloat(ha) * 10000).toFixed(2);
-            m2.dataset.autocalc = 'true';
+        const haInput = document.getElementById('numHectareas');
+        const m2Input = document.getElementById('metrosCuadrados');
+        if (haInput.value !== '') {
+            const val = parseFloat(haInput.value.replace(',', '.'));
+            if (!isNaN(val)) {
+                m2Input.value = (val * 10000).toFixed(2);
+            }
+        }
+    }
+
+    function calcularHectareas() {
+        const m2Input = document.getElementById('metrosCuadrados');
+        const haInput = document.getElementById('numHectareas');
+        if (m2Input.value !== '') {
+            const val = parseFloat(m2Input.value.replace(',', '.'));
+            if (!isNaN(val)) {
+                haInput.value = (val / 10000).toFixed(2);
+            }
         }
     }
 </script>

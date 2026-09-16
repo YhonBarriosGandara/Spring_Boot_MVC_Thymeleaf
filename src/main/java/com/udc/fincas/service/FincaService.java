@@ -40,10 +40,13 @@ public class FincaService {
 
     @Transactional
     public Finca guardar(Finca finca) {
-        // Logica de dominio: si metrosCuadrados es nulo o 0 y tiene hectareas, autocalcular (1 ha = 10,000 m2)
+        // Logica de dominio: autocalculo y consistencia bidireccional (1 ha = 10,000 m2)
         if ((finca.getMetrosCuadrados() == null || finca.getMetrosCuadrados().compareTo(BigDecimal.ZERO) == 0)
                 && finca.getNumHectareas() != null) {
             finca.setMetrosCuadrados(finca.getNumHectareas().multiply(BigDecimal.valueOf(10000)));
+        } else if ((finca.getNumHectareas() == null || finca.getNumHectareas().compareTo(BigDecimal.ZERO) == 0)
+                && finca.getMetrosCuadrados() != null) {
+            finca.setNumHectareas(finca.getMetrosCuadrados().divide(BigDecimal.valueOf(10000), 2, java.math.RoundingMode.HALF_UP));
         }
         return fincaRepository.save(finca);
     }
