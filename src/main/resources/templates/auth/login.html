@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Inicio de Sesión')}"></head>
+<body class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-sm-8 col-11">
+            
+            <!-- Mensajes de alerta -->
+            <div th:replace="~{fragments/header :: alerts}"></div>
+
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header navbar-agro text-white text-center py-4">
+                    <div class="d-inline-flex p-3 bg-white rounded-circle text-success mb-2 shadow-sm">
+                        <i class="bi bi-tree-fill fs-1 text-success"></i>
+                    </div>
+                    <h4 class="fw-bold mb-0">AgroFincas UDC</h4>
+                    <p class="small text-white-50 mb-0">Plataforma Web Spring Boot MVC</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <h5 class="card-title text-center fw-bold text-secondary mb-4">Autenticación de Usuario</h5>
+
+                    <form th:action="@{/login}" method="post">
+                        <div class="mb-3">
+                            <label for="id" class="form-label fw-semibold text-dark">
+                                <i class="bi bi-person-fill text-success me-1"></i> Identificador (ID / Usuario)
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="id" name="id"
+                                   placeholder="Ej: admin" th:value="${idIngresado}" required autofocus>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="clave" class="form-label fw-semibold text-dark mb-0">
+                                    <i class="bi bi-lock-fill text-success me-1"></i> Contraseña
+                                </label>
+                                <a th:href="@{/recuperar-clave}" class="small text-decoration-none text-success">
+                                    ¿Olvidó su contraseña?
+                                </a>
+                            </div>
+                            <input type="password" class="form-control form-control-lg" id="clave" name="clave"
+                                   placeholder="Ingrese su contraseña" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-agro btn-lg w-100 py-3 fw-bold shadow-sm">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
+                        </button>
+                    </form>
+
+                    <!-- Credenciales de Prueba para Evaluación Docente -->
+                    <div class="mt-4 p-3 bg-light rounded-3 border">
+                        <div class="d-flex align-items-center gap-1 text-success fw-bold small mb-2">
+                            <i class="bi bi-shield-check"></i> Credenciales de Prueba (Tutoría / Docente):
+                        </div>
+                        <ul class="list-unstyled small mb-0 text-muted">
+                            <li>&bull; <strong>Admin:</strong> <code>admin</code> / <code>admin123</code> (Control Total)</li>
+                            <li>&bull; <strong>Operador:</strong> <code>operador1</code> / <code>oper123</code> (Gestión Predios)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white text-center py-3 border-0 text-muted small">
+                    Universidad de Cartagena &bull; Desarrollo Web
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
