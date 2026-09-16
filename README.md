@@ -152,47 +152,58 @@ docker compose down
 
 ---
 
-### Opción B: Ejecución Tradicional (Maven Local + PostgreSQL)
+### Opción B: Ejecución con Maven Local (App Nativa)
 
-#### Requisitos Previos:
-* Java JDK 21 instalado (`java -version`).
-* Apache Maven 3.9+ instalado (`mvn -version`).
-* Servidor PostgreSQL en ejecución en el puerto `5432`.
-
-#### Paso 1: Configurar la Base de Datos
-Crear la base de datos y ejecutar los scripts provistos en la carpeta `sql/`:
+#### Método 1: Base de Datos en Docker + Spring Boot con Maven (Recomendada)
+Si no desea instalar ni configurar PostgreSQL manualmente en su sistema operativo, puede iniciar exclusivamente el contenedor de base de datos y ejecutar Spring Boot de forma nativa:
 
 ```bash
-# Crear base de datos en PostgreSQL
-psql -U postgres -c "CREATE DATABASE fincas_spring_db;"
+# 1. Iniciar únicamente el servicio de PostgreSQL en Docker:
+docker compose up -d postgres
 
-# Ejecutar esquema DDL y datos de prueba DML
-psql -U postgres -d fincas_spring_db -f sql/01_schema.sql
-psql -U postgres -d fincas_spring_db -f sql/02_data.sql
-```
-
-#### Paso 2: Ajustar Credenciales en `application.properties` (si difieren)
-Editar `src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/fincas_spring_db
-spring.datasource.username=postgres
-spring.datasource.password=postgrespassword
-```
-
-#### Paso 3: Ejecutar Pruebas y Levantar la Aplicación
-```bash
-# Ejecutar suite de pruebas de integración con MockMvc
+# 2. Ejecutar la suite de pruebas automatizadas:
 mvn clean test
 
-# Iniciar servidor embebido Tomcat en el puerto 8080
+# 3. Iniciar la aplicación Spring Boot nativamente:
 mvn spring-boot:run
 ```
 
-Abrir el navegador web en: **`http://localhost:8080`**.
+#### Método 2: PostgreSQL Nativo Instalado en el Sistema Operativo
+
+1. **Requisitos Previos:**
+   * Java JDK 21 (`java -version`).
+   * Apache Maven 3.9+ (`mvn -version`).
+   * Servidor PostgreSQL activo en el puerto `5432`.
+
+2. **Configurar la Base de Datos:**
+   ```bash
+   # Crear base de datos en PostgreSQL
+   psql -U postgres -c "CREATE DATABASE fincas_spring_db;"
+
+   # Ejecutar esquema DDL y datos de prueba DML
+   psql -U postgres -d fincas_spring_db -f sql/01_schema.sql
+   psql -U postgres -d fincas_spring_db -f sql/02_data.sql
+   ```
+
+3. **Verificar Credenciales en `src/main/resources/application.properties`:**
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/fincas_spring_db
+   spring.datasource.username=postgres
+   spring.datasource.password=postgrespassword
+   ```
+
+4. **Ejecutar Pruebas y Levantar:**
+   ```bash
+   mvn clean test
+   mvn spring-boot:run
+   ```
+
+Abrir el navegador web en: **`http://localhost:8080/login`**.
 
 ---
 
 ## 7. Despliegue en la Nube
 
 * **Repositorio GitHub:** [https://github.com/YhonBarriosGandara/Spring_Boot_MVC_Thymeleaf](https://github.com/YhonBarriosGandara/Spring_Boot_MVC_Thymeleaf)
-* **Aplicación Desplegada en Render:** *(Enlace público generado durante la fase de entrega final)*
+* **Aplicación Desplegada en Render:** [https://spring-boot-mvc-thymeleaf.onrender.com](https://spring-boot-mvc-thymeleaf.onrender.com)
+* **Base de Datos en la Nube:** PostgreSQL Serverless en AWS (Neon Cloud) con SSL obligatorio.
