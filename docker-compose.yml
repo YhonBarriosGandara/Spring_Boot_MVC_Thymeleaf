@@ -1,0 +1,51 @@
+services:
+  # Servicio de Base de Datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: agro_postgres_spring
+    environment:
+      POSTGRES_DB: fincas_spring_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_spring_data:/var/lib/postgresql/data
+      - ./sql/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./sql/02_data.sql:/docker-entrypoint-initdb.d/02_data.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fincas_spring_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agro_network
+
+  # Servicio de Aplicacion Spring Boot MVC
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agro_spring_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/fincas_spring_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgrespassword
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      PORT: 8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - agro_network
+
+networks:
+  agro_network:
+    driver: bridge
+
+volumes:
+  postgres_spring_data:
+    driver: local
